@@ -32,7 +32,7 @@ void checkResult(float *hostRef, float *gpuRef, const int N) {
 }
 
 void initialData(float *ip, int size) {
-	//—”ƒV[ƒh¶¬
+	//ä¹±æ•°ã‚·ãƒ¼ãƒ‰ç”Ÿæˆ
 	time_t t;
 	srand((unsigned)time(&t));
 
@@ -49,22 +49,22 @@ void sumArraysOnHost(float *A, float *B, float *C, const int N) {
 }
 
 __global__ void sumArraysOnGPU(float *A, float *B, float *C, const int N) {
-	int i = threadIdx.x;
+	int i = blockIdx.x*blockDim.x+threadIdx.x;
 	C[i] = A[i]+B[i];
 }
 
 int main(int argc, char **argv) {
 	printf("%s Starting...\n", argv[0]);
 
-	//ƒfƒoƒCƒX‚ÌƒZƒbƒgƒAƒbƒv
+	//ãƒ‡ãƒã‚¤ã‚¹ã®ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 	int dev = 0;
 	cudaSetDevice(dev);
 
-	//ƒxƒNƒgƒ‹‚Ìƒf[ƒ^ƒTƒCƒY‚ğİ’è
+	//ãƒ™ã‚¯ãƒˆãƒ«ã®ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‚’è¨­å®š
 	int nElem = 32;
 	printf("Vector size %d\n", nElem);
 
-	//ƒzƒXƒgƒƒ‚ƒŠŠm•Û
+	//ãƒ›ã‚¹ãƒˆãƒ¡ãƒ¢ãƒªç¢ºä¿
 	size_t nBytes = nElem*sizeof(float);
 
 	float *h_A, *h_B, *hostRef, *gpuRef;
@@ -73,46 +73,46 @@ int main(int argc, char **argv) {
 	hostRef = (float *)malloc(nBytes);
 	gpuRef = (float *)malloc(nBytes);
 
-	//ƒzƒXƒg‘¤‚Åƒf[ƒ^‚ğ‰Šú‰»
+	//ãƒ›ã‚¹ãƒˆå´ã§ãƒ‡ãƒ¼ã‚¿ã‚’åˆæœŸåŒ–
 	initialData(h_A, nElem);
 	initialData(h_B, nElem);
 
 	memset(hostRef, 0, nBytes);
 	memset(gpuRef, 0, nBytes);
 
-	//ƒfƒoƒCƒX‚ÌƒOƒ[ƒoƒ‹ƒƒ‚ƒŠŠm•Û
+	//ãƒ‡ãƒã‚¤ã‚¹ã®ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ¡ãƒ¢ãƒªç¢ºä¿
 	float *d_A, *d_B, *d_C;
 	cudaMalloc((float**)&d_A, nBytes);
 	cudaMalloc((float**)&d_B, nBytes);
 	cudaMalloc((float**)&d_C, nBytes);
 
-	//ƒzƒXƒg‚©‚çƒfƒoƒCƒX‚Öƒf[ƒ^“]‘—
+	//ãƒ›ã‚¹ãƒˆã‹ã‚‰ãƒ‡ãƒã‚¤ã‚¹ã¸ãƒ‡ãƒ¼ã‚¿è»¢é€
 	cudaMemcpy(d_A, h_A, nBytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_B, h_B, nBytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_C, gpuRef, nBytes, cudaMemcpyHostToDevice);
 
-	//ƒzƒXƒg‘¤‚ÅƒJ[ƒlƒ‹‚ğŒÄ‚Ño‚·
+	//ãƒ›ã‚¹ãƒˆå´ã§ã‚«ãƒ¼ãƒãƒ«ã‚’å‘¼ã³å‡ºã™
 	dim3 block(nElem);
 	dim3 grid(1);
 
 	sumArraysOnGPU<<< grid, block>>>(d_A, d_B, d_C, nElem);
 	printf("Execution configure <<<%d, %d>>>\n", grid.x, block.x);
 
-	//ƒJ[ƒlƒ‹‚ÌŒ‹‰Ê‚ğƒzƒXƒg‘¤‚ÉƒRƒs[
+	//ã‚«ãƒ¼ãƒãƒ«ã®çµæœã‚’ãƒ›ã‚¹ãƒˆå´ã«ã‚³ãƒ”ãƒ¼
 	cudaMemcpy(gpuRef, d_C, nBytes, cudaMemcpyDeviceToHost);
 
-	//Œ‹‰Ê‚ğƒ`ƒFƒbƒN‚·‚é‚½‚ß‚ÉƒzƒXƒg‘¤‚ÅƒxƒNƒgƒ‹‚ğ‰ÁZ
+	//çµæœã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹ãŸã‚ã«ãƒ›ã‚¹ãƒˆå´ã§ãƒ™ã‚¯ãƒˆãƒ«ã‚’åŠ ç®—
 	sumArraysOnHost(h_A, h_B, hostRef, nElem);
 
-	//ƒfƒoƒCƒX‚ÌŒ‹‰Ê‚ğƒ`ƒFƒbƒN
+	//ãƒ‡ãƒã‚¤ã‚¹ã®çµæœã‚’ãƒã‚§ãƒƒã‚¯
 	checkResult(hostRef, gpuRef, nElem);
 
-	//ƒfƒoƒCƒX‚ÌƒOƒ[ƒoƒ‹ƒƒ‚ƒŠ‰ğ•ú
+	//ãƒ‡ãƒã‚¤ã‚¹ã®ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ¡ãƒ¢ãƒªè§£æ”¾
 	cudaFree(d_A);
 	cudaFree(d_B);
 	cudaFree(d_C);
 
-	//ƒzƒXƒg‚Ìƒƒ‚ƒŠ‰ğ•ú
+	//ãƒ›ã‚¹ãƒˆã®ãƒ¡ãƒ¢ãƒªè§£æ”¾
 	free(h_A);
 	free(h_B);
 	free(hostRef);
