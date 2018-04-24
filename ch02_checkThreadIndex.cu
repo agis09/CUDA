@@ -1,4 +1,3 @@
-/*
 #include<cuda_runtime.h>
 #include<device_launch_parameters.h>
 #include<stdio.h>
@@ -42,50 +41,49 @@ __global__ void printThreadIndex(int *A, const int nx, const int ny) {
 int main(int argc, char **argv) {
 	printf("%s Starting... \n", argv[0]);
 
-	//ƒfƒoƒCƒXî•ñæ“¾
+	//ãƒ‡ãƒã‚¤ã‚¹æƒ…å ±å–å¾—
 	int dev = 0;
 	cudaDeviceProp deviceProp;
 	CHECK(cudaGetDeviceProperties(&deviceProp, dev));
 	printf("Using Device %d: %s\n", dev, deviceProp.name);
 	CHECK(cudaSetDevice(dev));
 
-	//s—ñ‚ÌŸŒ³‚ğİ’è
+	//è¡Œåˆ—ã®æ¬¡å…ƒã‚’è¨­å®š
 	int nx = 8;
 	int ny = 6;
 	int nxy = nx*ny;
 	int nBytes = nxy*sizeof(float);
-	//ƒzƒXƒgƒƒ‚ƒŠŠm•Û
+	//ãƒ›ã‚¹ãƒˆãƒ¡ãƒ¢ãƒªç¢ºä¿
 	int *h_A;
 	h_A = (int *)malloc(nBytes);
 
-	//ƒzƒXƒgs—ñ‚ğ®”‚Å‰Šú‰»
+	//ãƒ›ã‚¹ãƒˆè¡Œåˆ—ã‚’æ•´æ•°ã§åˆæœŸåŒ–
 	for (int i = 0; i<nxy; i++) {
 		h_A[i] = i;
 	}
 	printMatrix(h_A, nx, ny);
 
-	//ƒfƒoƒCƒXƒƒ‚ƒŠ‚ğŠm•Û
+	//ãƒ‡ãƒã‚¤ã‚¹ãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿
 	int *d_MatA;
 	CHECK(cudaMalloc((void **)&d_MatA,nBytes));
 
-	//ƒzƒXƒg‚©‚çƒfƒoƒCƒX‚Öƒf[ƒ^‚ğ“]‘—
+	//ãƒ›ã‚¹ãƒˆã‹ã‚‰ãƒ‡ãƒã‚¤ã‚¹ã¸ãƒ‡ãƒ¼ã‚¿ã‚’è»¢é€
 	CHECK(cudaMemcpy(d_MatA, h_A, nBytes, cudaMemcpyHostToDevice));
 
-	//Àsİ’è‚ğƒZƒbƒgƒAƒbƒv
+	//å®Ÿè¡Œè¨­å®šã‚’ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 	dim3 block(4, 2);
 	dim3 grid((nx+block.x-1)/block.x, (ny+block.y-1)/block.y);
 
-	//ƒJ[ƒlƒ‹‚ğŒÄ‚Ño‚·
+	//ã‚«ãƒ¼ãƒãƒ«ã‚’å‘¼ã³å‡ºã™
 	printThreadIndex<<<grid, block>>>(d_MatA, nx, ny);
 	CHECK(cudaDeviceSynchronize());
 
-	//ƒzƒXƒg‚ÆƒfƒoƒCƒX‚Ìƒƒ‚ƒŠ‚ğ‰ğ•ú
+	//ãƒ›ã‚¹ãƒˆã¨ãƒ‡ãƒã‚¤ã‚¹ã®ãƒ¡ãƒ¢ãƒªã‚’è§£æ”¾
 	CHECK(cudaFree(d_MatA));
 	free(h_A);
 
-	//ƒfƒoƒCƒX‚ğƒŠƒZƒbƒg
+	//ãƒ‡ãƒã‚¤ã‚¹ã‚’ãƒªã‚»ãƒƒãƒˆ
 	CHECK(cudaDeviceReset());
 
 	return 0;
 }
-*/
