@@ -43,7 +43,7 @@ __global__ void sumMatrixOnGPUMix(float *MatA, float *MatB, float *MatC, int nx,
 }
 
 void initialData(float *ip, int size) {
-	//—”ƒV[ƒh¶¬
+	//ä¹±æ•°ã‚·ãƒ¼ãƒ‰ç”Ÿæˆ
 	time_t t;
 	srand((unsigned)time(&t));
 
@@ -87,14 +87,14 @@ void checkResult(float *hostRef, float *gpuRef, const int N) {
 int main(int argc, char **argv) {
 	printf("%s Starting...\n", argv[0]);
 
-	//ƒfƒoƒCƒX‚ÌƒZƒbƒgƒAƒbƒv
+	//ãƒ‡ãƒã‚¤ã‚¹ã®ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 	int dev = 0;
 	cudaDeviceProp deviceProp;
 	CHECK(cudaGetDeviceProperties(&deviceProp, dev));
 	printf("Using Device %d: %s\n", dev, deviceProp.name);
 	CHECK(cudaSetDevice(dev));
 
-	//s—ñ‚Ìƒf[ƒ^ƒTƒCƒY‚ğİ’è
+	//è¡Œåˆ—ã®ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚ºã‚’è¨­å®š
 	int nx = 1<<14;
 	int ny = 1<<14;
 
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 	int nBytes = nxy*sizeof(float);
 	printf("Matrix size: nx%d ny%d\n", nx, ny);
 
-	//ƒzƒXƒgƒƒ‚ƒŠŠm•Û
+	//ãƒ›ã‚¹ãƒˆãƒ¡ãƒ¢ãƒªç¢ºä¿
 	float *h_A, *h_B, *hostRef, *gpuRef;
 	h_A = (float *)malloc(nBytes);
 	h_B = (float *)malloc(nBytes);
@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
 
 
 
-	//ƒzƒXƒg‘¤‚Åƒf[ƒ^‚ğ‰Šú‰»
+	//ãƒ›ã‚¹ãƒˆå´ã§ãƒ‡ãƒ¼ã‚¿ã‚’åˆæœŸåŒ–
 	iStart = clock();
 	initialData(h_A, nxy);
 	initialData(h_B, nxy);
@@ -126,24 +126,24 @@ int main(int argc, char **argv) {
 
 
 
-	//Œ‹‰Ê‚ğƒ`ƒFƒbƒN‚·‚é‚½‚ß‚ÉƒzƒXƒg‘¤‚Ås—ñ‚ğ‰ÁZ
+	//çµæœã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹ãŸã‚ã«ãƒ›ã‚¹ãƒˆå´ã§è¡Œåˆ—ã‚’åŠ ç®—
 	iStart = clock();
 	sumMatrixOnHost(h_A, h_B, hostRef, nx, ny);
 	iElaps = clock()-iStart;
 
 
-	//ƒfƒoƒCƒX‚ÌƒOƒ[ƒoƒ‹ƒƒ‚ƒŠ‚ğŠm•Û
+	//ãƒ‡ãƒã‚¤ã‚¹ã®ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ¡ãƒ¢ãƒªã‚’ç¢ºä¿
 	float *d_MatA, *d_MatB, *d_MatC;
 	CHECK(cudaMalloc((void **)&d_MatA, nBytes));
 	CHECK(cudaMalloc((void **)&d_MatB, nBytes));
 	CHECK(cudaMalloc((void **)&d_MatC, nBytes));
 
-	//ƒzƒXƒg‚©‚çƒfƒoƒCƒXƒf[ƒ^‚ğ“]‘—
+	//ãƒ›ã‚¹ãƒˆã‹ã‚‰ãƒ‡ãƒã‚¤ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’è»¢é€
 	CHECK(cudaMemcpy(d_MatA, h_A, nBytes, cudaMemcpyHostToDevice));
 	CHECK(cudaMemcpy(d_MatB, h_B, nBytes, cudaMemcpyHostToDevice));
 
 
-	//ƒzƒXƒg‘¤‚ÅƒJ[ƒlƒ‹‚ğŒÄ‚Ño‚·
+	//ãƒ›ã‚¹ãƒˆå´ã§ã‚«ãƒ¼ãƒãƒ«ã‚’å‘¼ã³å‡ºã™
 	dim3 block(32);
 	dim3 grid((nx+block.x-1)/block.x, ny);
 
@@ -162,27 +162,27 @@ int main(int argc, char **argv) {
 	iElaps = clock()-iStart;
 	printf("sumMatrixOnGPUMix<<<(%d,%d),(%d,%d)>>>elapsed %f sec\n", grid.x, grid.y, block.x, block.y, iElaps/CLOCKS_PER_SEC);
 
-	//ƒJ[ƒlƒ‹ƒGƒ‰[ƒ`ƒFƒbƒN
+	//ã‚«ãƒ¼ãƒãƒ«ã‚¨ãƒ©ãƒ¼ãƒã‚§ãƒƒã‚¯
 	CHECK(cudaGetLastError());
 
-	//ƒJ[ƒlƒ‹‚ÌŒ‹‰Ê‚ğƒzƒXƒg‘¤‚ÉƒRƒs[
+	//ã‚«ãƒ¼ãƒãƒ«ã®çµæœã‚’ãƒ›ã‚¹ãƒˆå´ã«ã‚³ãƒ”ãƒ¼
 	CHECK(cudaMemcpy(gpuRef, d_MatC, nBytes, cudaMemcpyDeviceToHost));
 
-	//ƒfƒoƒCƒX‚ÌŒ‹‰Ê‚ğƒ`ƒFƒbƒN
+	//ãƒ‡ãƒã‚¤ã‚¹ã®çµæœã‚’ãƒã‚§ãƒƒã‚¯
 	checkResult(hostRef, gpuRef, nxy);
 
-	//ƒfƒoƒCƒX‚ÌƒOƒ[ƒoƒ‹ƒƒ‚ƒŠ‚ğ‰ğ•ú
+	//ãƒ‡ãƒã‚¤ã‚¹ã®ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ¡ãƒ¢ãƒªã‚’è§£æ”¾
 	CHECK(cudaFree(d_MatA));
 	CHECK(cudaFree(d_MatB));
 	CHECK(cudaFree(d_MatC));
 
-	//ƒzƒXƒg‚Ìƒƒ‚ƒŠ‚ğ‰ğ•ú
+	//ãƒ›ã‚¹ãƒˆã®ãƒ¡ãƒ¢ãƒªã‚’è§£æ”¾
 	free(h_A);
 	free(h_B);
 	free(hostRef);
 	free(gpuRef);
 
-	//ƒfƒoƒCƒXƒŠƒZƒbƒg
+	//ãƒ‡ãƒã‚¤ã‚¹ãƒªã‚»ãƒƒãƒˆ
 	CHECK(cudaDeviceReset());
 
 	return 0;
